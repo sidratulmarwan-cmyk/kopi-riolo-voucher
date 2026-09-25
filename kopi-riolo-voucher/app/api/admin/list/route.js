@@ -22,7 +22,7 @@ export async function GET(req) {
     items.push({ phone, name, claimed: !!claimedAt, claimedAt: claimedAt || null });
   }
 
-  items.sort((a, b) => a.phone.localeCompare(b.phone));
+  items.sort((a, b) => String(a.phone).localeCompare(String(b.phone)));
   const claimed = items.filter((i) => i.claimed).length;
 
   return NextResponse.json({
