@@ -58,10 +58,19 @@ export default function AdminPage() {
     if (typeof window !== 'undefined') setQrUrl(window.location.origin);
   }, [load]);
 
+  // Refresh otomatis hanya tiap 60 detik dan hanya saat layar aktif.
+  // Saat layar kembali aktif, data langsung diperbarui sekali.
   useEffect(() => {
     if (!authed) return;
-    const t = setInterval(() => load(pw), 6000);
-    return () => clearInterval(t);
+    const tick = () => {
+      if (document.visibilityState === 'visible') load(pw);
+    };
+    const t = setInterval(tick, 60000);
+    document.addEventListener('visibilitychange', tick);
+    return () => {
+      clearInterval(t);
+      document.removeEventListener('visibilitychange', tick);
+    };
   }, [authed, pw, load]);
 
   async function login(e) {
@@ -183,6 +192,9 @@ export default function AdminPage() {
 
       <div className="card">
         <h2>Ringkasan</h2>
+        <button className="btn ghost sm" onClick={() => load(pw)} disabled={busy} style={{ marginBottom: 10 }}>
+          Refresh data
+        </button>
         <div className="sum">
           <div><span>Total nomor</span><b>{data?.total ?? 0}</b></div>
           <div><span>Sudah klaim</span><b>{data?.claimed ?? 0}</b></div>
